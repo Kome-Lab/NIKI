@@ -1,0 +1,6 @@
+{
+    "DISCORD_BOT_TOKEN": "hoge",
+    "DISCORD_BOT_STATUS_MESSAGE": "hoge",
+    "TARGET_USER_ID": "hoge",
+    "TARGET_GUILD_ID": "hoge"
+}

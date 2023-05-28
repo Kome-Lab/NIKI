@@ -1,0 +1,24 @@
+{
+    "name": "NIKI",
+    "version": "0.0.1",
+    "description": "あらゆるNIKIに関するBOT",
+    "license": "MIT",
+    "author": "Jumala9163 (https://github.com/jumala9163)",
+    "bugs": {
+        "url": "https://github.com/Kome-Lab/NIKI/issues"
+    },
+    "engines": {
+        "node": "16.x"
+    },
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "discord.js": "14.11.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Kome-Lab/NIKI.git"
+    }
+}
