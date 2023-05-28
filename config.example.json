@@ -1,6 +1,16 @@
 {
-    "DISCORD_BOT_TOKEN": "hoge",
-    "DISCORD_BOT_STATUS_MESSAGE": "hoge",
-    "TARGET_USER_ID": "hoge",
-    "TARGET_GUILD_ID": "hoge"
+    "DISCORD_BOT_TOKEN": "TOKEN HERE",
+    "DISCORD_BOT_STATUS_MESSAGE": "STATUS MESSAGE HERE",
+    "BOT_OWNER_DISCORD_ID": "BOT OWNER DISCORD ID HERE",
+    "ALLOW_USE_COMMAND_ROLE_ID": "ALLOW USE COMMAND ROLE ID HERE",
+    "TARGET_USER_ID": "TARGET USER ID HERE",
+    "TARGET_GUILD_ID": "TARGET GUILD ID HERE",
+    "NOTIFICATION_CHANNEL_ID": "NOTIFICATION CHANNEL ID HERE",
+    "FORCE_NICKNAME": "FORCE NICKNAME HERE",
+    "options":{
+        "notification-nickname-change": true,
+        "force-set-nickname": true,
+        "random-nickname-change": false,
+        "random-nickname-change-interval(min)": 60
+    }
 }

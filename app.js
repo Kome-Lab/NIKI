@@ -93,7 +93,10 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
                 console.log(`変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}"`);
-                client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
+                
+                if(config.options['notification-nickname-change'] == true){
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
+                }
                 //jsonに記録されたユーザーIDとニックネームを更新
                 updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
             }
@@ -101,16 +104,22 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
                 console.log(`変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
-                client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
-                //jsonに記録されたユーザーIDとニックネームを更新
+
+                if(config.options['notification-nickname-change'] == true){
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
+                }
+                    //jsonに記録されたユーザーIDとニックネームを更新
                 updateMember(`${newMember.user.id}`, `null`);
             }
             else if (oldMember.nickname !== newMember.nickname) {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
                 console.log(`変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
-                client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
-                //jsonに記録されたユーザーIDとニックネームを更新
+
+                if(config.options['notification-nickname-change'] == true){
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
+                }
+                    //jsonに記録されたユーザーIDとニックネームを更新
                 updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
             }
         
