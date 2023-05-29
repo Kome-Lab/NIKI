@@ -16,7 +16,9 @@ if (config.DISCORD_BOT_TOKEN == undefined) {
 client.on("ready", () => {
     const guild = client.guilds.cache.get(config.TARGET_GUILD_ID);
 
+    //起動完了通知
     console.log(`ログイン完了: ${client.user.tag}`);
+    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(` <a:discordverifygreen:1061226643160563732> BOT起動完了しました。`);
 
     //ステータスメッセージ設定
     client.user.setActivity(config.DISCORD_BOT_STATUS_MESSAGE, { type: ActivityType.Playing});
@@ -223,14 +225,14 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             //ニックネーム強制変更
             newMember.setNickname(config.FORCE_NICKNAME);
 
-            強制変更通知
+            //強制変更通知
             console.log(`${oldMember.nickname}(${oldMember.user.tag}) が ${newMember.nickname} にニックネームを変更しましたが、`);
             console.log(`強制ニックネーム固定機能が有効のため`);
             console.log(`${newMember.nickname}のニックネームを${config.FORCE_NICKNAME}に変更しました。`);
                 
             //もし、ニックネーム変更通知が有効だったら実行
             if(config.options['notification-nickname-change'] == true){ 
-                client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`# ${oldMember.nickname}(${oldMember.user.tag}) が ${newMember.nickname} に変更されましたが、\n# 強制ニックネーム固定機能が有効のため\n# ${newMember.nickname}(${oldMember.user.tag})のニックネームを${config.FORCE_NICKNAME}に変更しました。`); 
+                client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(` <a:discordverifyred:1061226635644391544> "${oldMember.nickname}(${oldMember.user.tag})" が "${newMember.nickname}" に変更されましたが、\n強制ニックネーム固定機能が有効のため\n"${newMember.nickname}(${oldMember.user.tag})"のニックネームを"${config.FORCE_NICKNAME}"に変更しました。`); 
             }
             
             //新しく変更されたニックネームを関数に代入
