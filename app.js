@@ -70,110 +70,113 @@ client.on("ready", () => {
     });
 });
 
-//ニックネーム変更検知
-client.on('guildMemberUpdate', (oldMember, newMember) => {
+
+
+client.on("guildMemberUpdate", (oldMember, newMember) => {
+
+    let updatejsonData = {};
+
+    if (fs.existsSync('target-info.json')) {
+        const jsonContent = fs.readFileSync('target-info.json');
+        updatejsonData = JSON.parse(jsonContent);
+    }
+
+    //時刻情報とUTCの値を追加
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
+    const updatejsonformattedDateTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}.${milliseconds} UTC+${now.getTimezoneOffset() / -60}`;
+    updatejsonData.gettime = updatejsonformattedDateTime;
+
     if (oldMember.user.id == config.TARGET_USER_ID || newMember.user.id == config.TARGET_USER_ID) {
-
-        //JSONファイルの読み込み
-        let jsonData = {};
-        if (fs.existsSync('target-info.json')) {
-            const jsonContent = fs.readFileSync('target-info.json');
-            updatejsonData = JSON.parse(jsonContent);
-        }
-
+        
         //ユーザーIDとニックネームをjsonに書くための型を設定
         function updateMember(userId, nickname) {
             if (!updatejsonData.hasOwnProperty("nickname")) {
-                updatejsonData.nickname = {};
+                    updatejsonData.nickname = {};
             }
             updatejsonData.nickname[userId] = nickname;
         }
 
+        if(config.options['force-set-nickname'] == false) {
             if (oldMember.nickname == null) {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
                 console.log(`変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}"`);
                 
+                //jsonに記録されたユーザーIDとニックネームを更新
+                updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
+
                 if(config.options['notification-nickname-change'] == true){
                     client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
                 }
-                //jsonに記録されたユーザーIDとニックネームを更新
-                updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
-            }
+            }   
             else if (newMember.nickname == null) {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
                 console.log(`変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
 
+                //jsonに記録されたユーザーIDとニックネームを更新
+                updateMember(`${newMember.user.id}`, `null`);
+
                 if(config.options['notification-nickname-change'] == true){
                     client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
                 }
-                    //jsonに記録されたユーザーIDとニックネームを更新
-                updateMember(`${newMember.user.id}`, `null`);
             }
             else if (oldMember.nickname !== newMember.nickname) {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
                 console.log(`変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
 
+                //jsonに記録されたユーザーIDとニックネームを更新
+                updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
+            
                 if(config.options['notification-nickname-change'] == true){
                     client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
                 }
-                    //jsonに記録されたユーザーIDとニックネームを更新
-                updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
             }
+            //JSONファイルに書き込み
+            fs.writeFile('target-info.json', JSON.stringify(updatejsonData, null, 2), err => {
+                if (err) {
+                    console.error('エラーが発生しました:', err);
+                    return;
+                }
+                console.log('[',updatejsonformattedDateTime,']','更新が完了しました。');
+            });
+        }
         
+        if(config.options['force-set-nickname'] == true && newMember.nickname !== config.FORCE_NICKNAME) {
 
-        //時刻情報とUTCの値を追加
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = (now.getMonth() + 1).toString().padStart(2, '0');
-        const day = now.getDate().toString().padStart(2, '0');
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        const seconds = now.getSeconds().toString().padStart(2, '0');
-        const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
-        const updatejsonformattedDateTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}.${milliseconds} UTC+${now.getTimezoneOffset() / -60}`;
-        updatejsonData.gettime = updatejsonformattedDateTime;
-    
-        //JSONファイルに書き込み
-        fs.writeFile('target-info.json', JSON.stringify(updatejsonData, null, 2), err => {
-            if (err) {
-                console.error('エラーが発生しました:', err);
-                return;
+            //ニックネーム強制変更
+            newMember.setNickname(config.FORCE_NICKNAME);
+
+            console.log(`${oldMember.nickname}(${oldMember.user.tag}) が ${newMember.nickname} にニックネームを変更しましたが、`);
+            console.log(`強制ニックネーム固定機能が有効のため`);
+            console.log(`${newMember.nickname}のニックネームを${config.FORCE_NICKNAME}に変更しました。`);
+                
+            if(config.options['notification-nickname-change'] == true){ 
+                client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`# ${oldMember.nickname}(${oldMember.user.tag}) が ${newMember.nickname} に変更されましたが、\n# 強制ニックネーム固定機能が有効のため\n# ${newMember.nickname}(${oldMember.user.tag})のニックネームを${config.FORCE_NICKNAME}に変更しました。`); 
             }
-            console.log('[',updatejsonformattedDateTime,']','更新が完了しました。');
-        });
+            
+            //jsonに記録されたユーザーIDとニックネームを更新
+            updateMember(`${newMember.user.id}`, `${config.FORCE_NICKNAME}`);
+            
+            //JSONファイルに書き込み
+            fs.writeFile('target-info.json', JSON.stringify(updatejsonData, null, 2), err => {
+                if (err) {
+                    console.error('エラーが発生しました:', err);
+                    return;
+                }
+                console.log('[',updatejsonformattedDateTime,']','更新が完了しました。');
+            });
+        }
     }
-
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //ログイン
 client.login(config.DISCORD_BOT_TOKEN );
