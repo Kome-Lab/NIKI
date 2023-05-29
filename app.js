@@ -31,8 +31,8 @@ client.on("ready", () => {
 
         //JSONファイルの読み込み
         let jsonData = {};
-        if (fs.existsSync('target-info.json')) {
-            const jsonContent = fs.readFileSync('target-info.json');
+        if (fs.existsSync('lastest-target-info.json')) {
+            const jsonContent = fs.readFileSync('lastest-target-info.json');
             jsonData = JSON.parse(jsonContent);
         }
 
@@ -60,7 +60,7 @@ client.on("ready", () => {
         jsonData.gettime = formattedDateTime;
 
         //JSONファイルに書き込み
-        fs.writeFile('target-info.json', JSON.stringify(jsonData, null, 2), err => {
+        fs.writeFile('lastest-target-info.json', JSON.stringify(jsonData, null, 2), err => {
             if (err) {
                 console.error('エラーが発生しました:', err);
                 return;
@@ -71,13 +71,15 @@ client.on("ready", () => {
 });
 
 
-
+//着火マン
 client.on("guildMemberUpdate", (oldMember, newMember) => {
 
+    //jsonに落とし込む為の変数作成
     let updatejsonData = {};
 
-    if (fs.existsSync('target-info.json')) {
-        const jsonContent = fs.readFileSync('target-info.json');
+    //ターゲットユーザー用jsonファイル読み込み
+    if (fs.existsSync('lastest-target-info.json')) {
+        const jsonContent = fs.readFileSync('lastest-target-info.json');
         updatejsonData = JSON.parse(jsonContent);
     }
 
@@ -93,9 +95,10 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
     const updatejsonformattedDateTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}.${milliseconds} UTC+${now.getTimezoneOffset() / -60}`;
     updatejsonData.gettime = updatejsonformattedDateTime;
 
+    //もし、ニックネームの変更されたユーザーがターゲットユーザーIDと一致したら処理を実行
     if (oldMember.user.id == config.TARGET_USER_ID || newMember.user.id == config.TARGET_USER_ID) {
         
-        //ユーザーIDとニックネームをjsonに書くための型を設定
+        //ユーザーIDとニックネームをjsonに書くための関数を定義
         function updateMember(userId, nickname) {
             if (!updatejsonData.hasOwnProperty("nickname")) {
                     updatejsonData.nickname = {};
@@ -103,19 +106,79 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             updatejsonData.nickname[userId] = nickname;
         }
 
+        //もし強制ニックネーム変更が向こうで、かつ、ランダムニックネーム変更機能が有効なら処理を実行
+        if(config.options['force-set-nickname'] == false && config.options['random-nickname-change'] == true) {
+
+            //もし、変更前のニックネームが無かった場合
+            if (oldMember.nickname == null) {
+                //ニックネーム変更通知
+                console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
+                console.log(`変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}"`);
+                
+                //新しく変更されたニックネームを関数に代入
+                updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
+
+                //もし、ニックネーム変更通知が有効だったら実行
+                if(config.options['notification-nickname-change'] == true){
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
+                }
+            }   
+
+            //変更後のニックネームがnullだった場合
+            else if (newMember.nickname == null) {
+                //ニックネーム変更通知
+                console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
+                console.log(`変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
+
+                //新しく変更されたニックネームを関数に代入
+                updateMember(`${newMember.user.id}`, `null`);
+
+                //もし、ニックネーム変更通知が有効だったら実行
+                if(config.options['notification-nickname-change'] == true){
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
+                }
+            }
+            
+            else if (oldMember.nickname !== newMember.nickname) {
+                //ニックネーム変更通知
+                console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
+                console.log(`変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
+
+               //新しく変更されたニックネームを関数に代入
+                updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
+            
+                //もし、ニックネーム変更通知が有効だったら実行
+                if(config.options['notification-nickname-change'] == true){
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
+                }
+            }
+            //JSONファイルに書き込み
+            fs.writeFile('lastest-target-info.json', JSON.stringify(updatejsonData, null, 2), err => {
+                if (err) {
+                    console.error('エラーが発生しました:', err);
+                    return;
+                }
+                console.log('[',updatejsonformattedDateTime,']','更新が完了しました。');
+            });
+        }
+
+        //強制ニックネーム変更機能が無効だった場合に実行
         if(config.options['force-set-nickname'] == false) {
             if (oldMember.nickname == null) {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
                 console.log(`変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}"`);
                 
-                //jsonに記録されたユーザーIDとニックネームを更新
+                //もし、ニックネーム変更通知が有効だったら実行
                 updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
 
+                //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
                     client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
                 }
             }   
+
+            //もし、変更後のニックネームがnullだった場合に実行
             else if (newMember.nickname == null) {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
@@ -124,24 +187,28 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
                 //jsonに記録されたユーザーIDとニックネームを更新
                 updateMember(`${newMember.user.id}`, `null`);
 
+                //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
                     client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
                 }
             }
+
+            //もし、変更の前のニックネームと変更後のニックネームがnullで無い場合に実行
             else if (oldMember.nickname !== newMember.nickname) {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
                 console.log(`変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
 
-                //jsonに記録されたユーザーIDとニックネームを更新
+                //新しく変更されたニックネームを関数に代入
                 updateMember(`${newMember.user.id}`, `${newMember.nickname}`);
             
+                //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
                     client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
                 }
             }
             //JSONファイルに書き込み
-            fs.writeFile('target-info.json', JSON.stringify(updatejsonData, null, 2), err => {
+            fs.writeFile('lastest-target-info.json', JSON.stringify(updatejsonData, null, 2), err => {
                 if (err) {
                     console.error('エラーが発生しました:', err);
                     return;
@@ -149,25 +216,28 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
                 console.log('[',updatejsonformattedDateTime,']','更新が完了しました。');
             });
         }
-        
+
+        //もし、強制ニックネーム変更が有効でかつ、変更後のニックネームがconfig.jsonで設定されているニックネームと違った場合に実行
         if(config.options['force-set-nickname'] == true && newMember.nickname !== config.FORCE_NICKNAME) {
 
             //ニックネーム強制変更
             newMember.setNickname(config.FORCE_NICKNAME);
 
+            強制変更通知
             console.log(`${oldMember.nickname}(${oldMember.user.tag}) が ${newMember.nickname} にニックネームを変更しましたが、`);
             console.log(`強制ニックネーム固定機能が有効のため`);
             console.log(`${newMember.nickname}のニックネームを${config.FORCE_NICKNAME}に変更しました。`);
                 
+            //もし、ニックネーム変更通知が有効だったら実行
             if(config.options['notification-nickname-change'] == true){ 
                 client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`# ${oldMember.nickname}(${oldMember.user.tag}) が ${newMember.nickname} に変更されましたが、\n# 強制ニックネーム固定機能が有効のため\n# ${newMember.nickname}(${oldMember.user.tag})のニックネームを${config.FORCE_NICKNAME}に変更しました。`); 
             }
             
-            //jsonに記録されたユーザーIDとニックネームを更新
+            //新しく変更されたニックネームを関数に代入
             updateMember(`${newMember.user.id}`, `${config.FORCE_NICKNAME}`);
             
             //JSONファイルに書き込み
-            fs.writeFile('target-info.json', JSON.stringify(updatejsonData, null, 2), err => {
+            fs.writeFile('lastest-target-info.json', JSON.stringify(updatejsonData, null, 2), err => {
                 if (err) {
                     console.error('エラーが発生しました:', err);
                     return;
