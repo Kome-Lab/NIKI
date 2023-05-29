@@ -132,4 +132,5 @@ dist
 # Jumala Custom
 config.json
 lastest-target-info.json
+nickname-history.json
 package-lock.json

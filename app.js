@@ -99,7 +99,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
 
     //もし、ニックネームの変更されたユーザーがターゲットユーザーIDと一致したら処理を実行
     if (oldMember.user.id == config.TARGET_USER_ID || newMember.user.id == config.TARGET_USER_ID) {
-        
+
         //ユーザーIDとニックネームをjsonに書くための関数を定義
         function updateMember(userId, nickname) {
             if (!updatejsonData.hasOwnProperty("nickname")) {
@@ -110,6 +110,9 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
 
         //もし強制ニックネーム変更が向こうで、かつ、ランダムニックネーム変更機能が有効なら処理を実行
         if(config.options['force-set-nickname'] == false && config.options['random-nickname-change'] == true) {
+
+            //ニックネーム履歴を保管する場所を定義
+            const nicknameHistory = loadNicknameHistory();
 
             //もし、変更前のニックネームが無かった場合
             if (oldMember.nickname == null) {
@@ -162,10 +165,44 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
                 }
                 console.log('[',updatejsonformattedDateTime,']','更新が完了しました。');
             });
+            
+            nicknameHistory.push({
+                userId: newMember.user.id,
+                oldNickname: oldMember.nickname,
+                newNickname: newMember.nickname,
+                timestamp: updatejsonformattedDateTime
+            });
+
+            saveNicknameHistory(nicknameHistory);
+            
+            // 履歴をロードする関数
+            function loadNicknameHistory() {
+                try {
+                    const data = fs.readFileSync('./nickname-history.json', 'utf8');
+                    return JSON.parse(data);
+                } catch (err) {
+                    console.error('履歴のロード中にエラーが発生しました:', err);
+                    return [];
+                }
+            }
+            
+            // 履歴を保存する関数
+            function saveNicknameHistory(nicknameHistory) {
+                try {
+                    fs.writeFileSync('./nickname-history.json', JSON.stringify(nicknameHistory, null, 2));
+                    console.log('履歴を保存しました');
+                } catch (err) {
+                    console.error('履歴の保存中にエラーが発生しました:', err);
+                }
+            }
         }
 
         //強制ニックネーム変更機能が無効だった場合に実行
         if(config.options['force-set-nickname'] == false) {
+
+            //ニックネーム履歴を保管する場所を定義
+            const nicknameHistory = loadNicknameHistory();
+
             if (oldMember.nickname == null) {
                 //ニックネーム変更通知
                 console.log(`${oldMember.user.tag}がニックネームを変更しました。`);
@@ -217,6 +254,37 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
                 }
                 console.log('[',updatejsonformattedDateTime,']','更新が完了しました。');
             });
+
+            nicknameHistory.push({
+                userId: newMember.user.id,
+                oldNickname: oldMember.nickname,
+                newNickname: newMember.nickname,
+                timestamp: updatejsonformattedDateTime
+            });
+
+            saveNicknameHistory(nicknameHistory);
+            
+            // 履歴をロードする関数
+            function loadNicknameHistory() {
+                try {
+                    const data = fs.readFileSync('./nickname-history.json', 'utf8');
+                    return JSON.parse(data);
+                } catch (err) {
+                    console.error('履歴のロード中にエラーが発生しました:', err);
+                    return [];
+                }
+            }
+            
+            // 履歴を保存する関数
+            function saveNicknameHistory(nicknameHistory) {
+                try {
+                    fs.writeFileSync('./nickname-history.json', JSON.stringify(nicknameHistory, null, 2));
+                    console.log('履歴を保存しました');
+                } catch (err) {
+                    console.error('履歴の保存中にエラーが発生しました:', err);
+                }
+            }
+            
         }
 
         //もし、強制ニックネーム変更が有効でかつ、変更後のニックネームがconfig.jsonで設定されているニックネームと違った場合に実行
