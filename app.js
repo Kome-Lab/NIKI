@@ -5,6 +5,7 @@ const fs = require("fs");
 
 //jsonを読み込む
 const config = require("./config.json");
+const dataFile = 'nickname-history.json';
 
 //TOKEN確認
 if (config.DISCORD_BOT_TOKEN == undefined) {
@@ -14,10 +15,13 @@ if (config.DISCORD_BOT_TOKEN == undefined) {
 
 //ログイン完了通知
 client.on("ready", () => {
+
+    //サーバー情報取得
     const guild = client.guilds.cache.get(config.TARGET_GUILD_ID);
 
     //起動完了通知
     console.log(`ログイン完了: ${client.user.tag}`);
+    console.log('hello Jumala')
     client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(` <a:discordverifygreen:1061226643160563732> BOT起動完了しました。`);
 
     //ステータスメッセージ設定
@@ -125,7 +129,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
 
                 //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
-                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`<a:discordverifyblue:1061226631504597053>${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
                 }
             }   
 
@@ -140,7 +144,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
 
                 //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
-                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`<a:discordverifyblue:1061226631504597053>${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
                 }
             }
             
@@ -154,7 +158,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             
                 //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
-                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`<a:discordverifyblue:1061226631504597053>${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
                 }
             }
             //JSONファイルに書き込み
@@ -178,7 +182,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             // 履歴をロードする関数
             function loadNicknameHistory() {
                 try {
-                    const data = fs.readFileSync('./nickname-history.json', 'utf8');
+                    const data = fs.readFileSync(dataFile);
                     return JSON.parse(data);
                 } catch (err) {
                     console.error('履歴のロード中にエラーが発生しました:', err);
@@ -189,7 +193,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             // 履歴を保存する関数
             function saveNicknameHistory(nicknameHistory) {
                 try {
-                    fs.writeFileSync('./nickname-history.json', JSON.stringify(nicknameHistory, null, 2));
+                    fs.writeFileSync(dataFile, JSON.stringify(nicknameHistory, null, 2));
                     console.log('履歴を保存しました');
                 } catch (err) {
                     console.error('履歴の保存中にエラーが発生しました:', err);
@@ -213,7 +217,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
 
                 //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
-                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`<a:discordverifyblue:1061226631504597053>${oldMember.user.tag}がニックネームを変更しました。\n変更前："ニックネーム無し"  ->  変更後："${newMember.nickname}`);
                 }
             }   
 
@@ -228,7 +232,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
 
                 //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
-                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`<a:discordverifyblue:1061226631504597053>${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："ニックネーム無し"`);
                 }
             }
 
@@ -243,7 +247,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             
                 //もし、ニックネーム変更通知が有効だったら実行
                 if(config.options['notification-nickname-change'] == true){
-                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
+                    client.channels.cache.get(config.NOTIFICATION_CHANNEL_ID).send(`<a:discordverifyblue:1061226631504597053>${oldMember.user.tag}がニックネームを変更しました。\n変更前："${oldMember.nickname}"  ->  変更後："${newMember.nickname}"`);
                 }
             }
             //JSONファイルに書き込み
@@ -267,7 +271,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             // 履歴をロードする関数
             function loadNicknameHistory() {
                 try {
-                    const data = fs.readFileSync('./nickname-history.json', 'utf8');
+                    const data = fs.readFileSync(dataFile, 'utf8');
                     return JSON.parse(data);
                 } catch (err) {
                     console.error('履歴のロード中にエラーが発生しました:', err);
@@ -278,7 +282,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
             // 履歴を保存する関数
             function saveNicknameHistory(nicknameHistory) {
                 try {
-                    fs.writeFileSync('./nickname-history.json', JSON.stringify(nicknameHistory, null, 2));
+                    fs.writeFileSync(dataFile, JSON.stringify(nicknameHistory, null, 2));
                     console.log('履歴を保存しました');
                 } catch (err) {
                     console.error('履歴の保存中にエラーが発生しました:', err);
